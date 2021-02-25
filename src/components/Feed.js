@@ -5,33 +5,32 @@ import "../components/Card";
 import StoryCard from "./StoryCard";
 import Nav from "./Nav";
 import Post from "../components/Post";
-
+import { useSelector,  } from "react-redux";
+import { selectUser,  } from "../features/userSlice";
 function Feed() {
   const [texts, setexts] = useState("");
+  const [image, setImage] = useState("");
+  const [show, setShow] = useState(false);
   const [posts, setPost] = useState([]);
+//added
+  const currentUser = useSelector(selectUser);
+  const toggleChecked = () => setShow((value) => !value);
+
   const handleGetData = async () => {
     await fetch("http://localhost:8000/api/post")
       .then((res) => res.json())
       .then((data) => setPost(data));
   };
 
-  useEffect(() => {
-    handleGetData();
-  }, []);
-  // need to formate date get redux to get state,add delete update to post
-  //  post
-
   const handleFormSubmit = async (e) => {
     e.preventDefault();
 
     const data = {
-      username: "Stephen",
-      photo:
-        "https://media-exp1.licdn.com/dms/image/C4D03AQHeZuu5PGQzYw/profile-displayphoto-shrink_200_200/0/1600449353015?e=1619654400&v=beta&t=beUY3v1xVyOsDxiE8qPu_4zZPrlzJCYsGKOsxHJ_VX4",
+    username: currentUser.data.name,
+      photo: currentUser.data.photo,
       description: texts,
-      user: "6031b805d553b6b13ae92567",
-      image:
-        "https://images2.minutemediacdn.com/image/upload/c_crop,h_1124,w_2000,x_0,y_46/f_auto,q_auto,w_1100/v1554932218/shape/mentalfloss/532661-istock-825167430.jpg",
+      user: currentUser.data._id,
+      image: image,
     };
 
     await fetch("http://localhost:8000/api/post", {
@@ -48,21 +47,20 @@ function Feed() {
       .catch((error) => {
         console.error("Error:", error);
       });
+    setImage("");
+    setexts("");
   };
 
-  console.log(texts);
+
+
+  useEffect(() => {
+    handleGetData();
+  }, [texts]);
+  // need to formate date get redux to get state,add delete update to post
+  //  post
   return (
     <div className="feed">
       <Nav />
-      {/* <div className="feed__stories">
-        <StoryCard />
-        <StoryCard />
-        <StoryCard />
-        <StoryCard />
-        <StoryCard />
-        <StoryCard />
-        <StoryCard />
-      </div> */}
       <div className="feed__container">
         <form
           className="feed__form"
@@ -79,11 +77,26 @@ function Feed() {
             value={texts}
             onChange={(e) => setexts(e.target.value)}
           />
+          <label htmlFor="image"></label>
+          {show ? (
+            <input
+              type="text"
+              id="feed__imageInput"
+              name="image"
+              placeholder="Add an image"
+              value={image}
+              onChange={(e) => setImage(e.target.value)}
+            />
+          ) : (
+            <></>
+          )}
         </form>
         <div className="feed__container two">
           <div className="feed__imageContainer">
-            <p className="feed__imageContainer">Add image</p>
-            <button className="feed__imageButton hover">Image</button>
+            <p className="feed__imageContainer"></p>
+            <button className="feed__imageButton hover" onClick={toggleChecked}>
+              Image
+            </button>
           </div>
 
           <button
@@ -98,7 +111,7 @@ function Feed() {
         </div>
       </div>
       <div>
-        {posts.reverse().map((post) => (
+        {posts.map((post) => (
           <Post key={post.id} post={post} />
         ))}
       </div>
