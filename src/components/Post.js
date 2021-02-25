@@ -3,14 +3,15 @@ import { Avatar } from "@material-ui/core";
 import ThumbUpIcon from "@material-ui/icons/ThumbUp";
 import EmojiEmotionsIcon from "@material-ui/icons/EmojiEmotions";
 import DeleteIcon from "@material-ui/icons/Delete";
+import { useSelector } from "react-redux";
+import { selectUser } from "../features/userSlice";
 import "../styles/Post.css";
 function Post({ post }) {
-  // add icons need to add current user id
-  //add delete
-  console.log(post.user);
+  const currentUser = useSelector(selectUser);
+  console.log(currentUser.data._id, post.user);
   const user = true;
-  const handlePostDelete = async() => {
-    await fetch(`http://localhost:8000/api/post/${post._id}`, {
+  const handlePostDelete = async () => {
+    await fetch(`http://localhost:8000/api/post/${post.user}`, {
       method: "DELETE",
     })
       .then((res) => res.json())
@@ -29,9 +30,7 @@ function Post({ post }) {
       <p>{post.description}</p>
       <img className="post__image" src={post.image} alt="" />
       <div className="post__icons">
-        {/* <ThumbUpIcon className=""/>
-          <EmojiEmotionsIcon className=""/> */}
-        {post.user === post.user ? (
+        {currentUser.data._id === post.user ? (
           <DeleteIcon className="red" onClick={handlePostDelete} />
         ) : (
           <></>
